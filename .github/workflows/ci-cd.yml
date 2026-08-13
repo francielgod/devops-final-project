@@ -1,0 +1,77 @@
+name: Pipeline CI/CD DevOps
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint-and-test:
+    name: Integración Continua (Calidad & Pruebas)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código Fuente
+        uses: actions/checkout@v3
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - name: Instalar Dependencias
+        run: npm ci
+
+      - name: Análisis Estático de Código (Linter)
+        run: npm run lint
+
+      - name: Ejecutar Pruebas Unitarias e Integración
+        run: npm test -- --coverage
+
+      - name: Cargar Reporte de Cobertura
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: coverage/
+
+  build-and-push:
+    name: Construcción y Publicación de Contenedor Docker
+    needs: lint-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Descargar Código Fuente
+        uses: actions/checkout@v3
+
+      - name: Autenticación en Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Configurar Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Construir y Publicar Imagen Docker
+        uses: docker/build-push-action@v4
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/devops-task-app:latest
+            ${{ secrets.DOCKERHUB_USERNAME }}/devops-task-app:${{ github.sha }}
+
+  deploy:
+    name: Despliegue Automatizado en Producción
+    needs: build-and-push
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Simulación de Despliegue en Entorno Cloud
+        run: |
+          echo "Iniciando despliegue de la imagen con tag ${{ github.sha }}"
+          echo "Realizando comprobación de estado en la URL de producción..."
+          echo "Despliegue completado con éxito."

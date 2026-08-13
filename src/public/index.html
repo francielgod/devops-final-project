@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DevOps Task Manager</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding-top: 50px; }
+        .card { background-color: #1e293b; padding: 25px 35px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); max-width: 500px; width: 100%; }
+        h1 { color: #38bdf8; font-size: 1.6rem; margin-bottom: 5px; }
+        .status-badge { display: inline-block; background-color: #10b981; color: #064e3b; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; margin-bottom: 20px; }
+        ul { list-style: none; padding: 0; }
+        li { background-color: #334155; margin: 8px 0; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; }
+        .completed { text-decoration: line-through; color: #94a3b8; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Dashboard DevOps App</h1>
+        <span class="status-badge" id="status">Cargando estado...</span>
+        
+        <h3>Lista de Tareas (API REST)</h3>
+        <ul id="task-list"></ul>
+    </div>
+
+    <script>
+        fetch('/health')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('status').innerText = `Estado API: ${data.status}`;
+            })
+            .catch(() => {
+                document.getElementById('status').innerText = 'API Offline';
+                document.getElementById('status').style.backgroundColor = '#ef4444';
+            });
+
+        fetch('/api/v1/tasks')
+            .then(res => res.json())
+            .then(tasks => {
+                const list = document.getElementById('task-list');
+                list.innerHTML = tasks.map(t => 
+                    `<li><span class="${t.completed ? 'completed' : ''}">${t.title}</span> <span>${t.completed ? '✅' : '⏳'}</span></li>`
+                ).join('');
+            });
+    </script>
+</body>
+</html>
