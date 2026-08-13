@@ -1,6 +1,6 @@
 # 🚀 Proyecto Final DevOps - Task API App
 
-![GitHub Actions Status](https://img.shields.io/github/actions/workflow/status/TU_USUARIO_GITHUB/devops-final-project/ci-cd.yml?branch=main&style=flat-square&logo=github)
+![GitHub Actions Status](https://img.shields.io/github/actions/workflow/status/francielgod/devops-final-project/ci-cd.yml?branch=main&style=flat-square&logo=github)
 ![Docker Pulls](https://img.shields.io/docker/pulls/francielbeltre/devops-task-app?style=flat-square&logo=docker)
 ![Node.js](https://img.shields.io/badge/Node.js-18-339933?style=flat-square&logo=nodedotjs)
 
