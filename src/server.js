@@ -1,3 +1,4 @@
+const db = require('./database');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -17,12 +18,10 @@ const httpRequestDurationMicroseconds = new client.Histogram({
   buckets: [0.1, 0.3, 0.5, 0.7, 1, 3, 5]
 });
 
-// Middlewares
 app.use(helmet({ contentSecurityPolicy: false })); // Desactiva CSP para permitir scripts del frontend
 app.use(cors());
 app.use(express.json());
 
-// Servir automáticamente el index.html ubicado en src/public
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use((req, res, next) => {
@@ -36,7 +35,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Endpoints de la API
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'UP', timestamp: new Date().toISOString() });
 });
@@ -47,10 +45,28 @@ app.get('/metrics', async (req, res) => {
 });
 
 app.get('/api/v1/tasks', (req, res) => {
-  res.status(200).json([
-    { id: 1, title: 'Configurar Docker', completed: true },
-    { id: 2, title: 'Crear Pipeline CI/CD en GitHub Actions', completed: false }
-  ]);
+  db.all("SELECT * FROM tasks", [], (err, rows) => {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+    res.status(200).json(rows);
+  });
+});
+
+app.post('/api/v1/tasks', (req, res) => {
+  const { title } = req.body;
+  
+  if (!title) {
+    return res.status(400).json({ error: "El título es requerido" });
+  }
+
+  db.run("INSERT INTO tasks (title) VALUES (?)", [title], function(err) {
+    if (err) {
+      return res.status(500).json({ error: err.message });
+    }
+
+    res.status(201).json({ id: this.lastID, title, completed: 0 });
+  });
 });
 
 if (process.env.NODE_ENV !== 'test') {
