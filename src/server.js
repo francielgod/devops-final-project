@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const client = require('prom-client');
 const path = require('path');
+const morgan = require('morgan');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,6 +22,7 @@ const httpRequestDurationMicroseconds = new client.Histogram({
 app.use(helmet({ contentSecurityPolicy: false })); // Desactiva CSP para permitir scripts del frontend
 app.use(cors());
 app.use(express.json());
+app.use(morgan('combined'));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -51,6 +53,11 @@ app.get('/api/v1/tasks', (req, res) => {
     }
     res.status(200).json(rows);
   });
+});
+app.post('/api/v1/alert', (req, res) => {
+  // En un entorno real, esto enviaría un mensaje a Slack, Discord o un correo
+  console.warn('\n🚨 [ALERTA CRÍTICA]: Se ha disparado un evento de monitoreo manual en el sistema.\n');
+  res.status(500).json({ message: 'Alerta registrada exitosamente en los logs del servidor' });
 });
 
 app.post('/api/v1/tasks', (req, res) => {
