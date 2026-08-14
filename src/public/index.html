@@ -3,45 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DevOps Task Manager</title>
+    <title>Task API - DevOps Final</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #0f172a; color: #f8fafc; display: flex; justify-content: center; padding-top: 50px; }
-        .card { background-color: #1e293b; padding: 25px 35px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.3); max-width: 500px; width: 100%; }
-        h1 { color: #38bdf8; font-size: 1.6rem; margin-bottom: 5px; }
-        .status-badge { display: inline-block; background-color: #10b981; color: #064e3b; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; margin-bottom: 20px; }
-        ul { list-style: none; padding: 0; }
-        li { background-color: #334155; margin: 8px 0; padding: 12px 15px; border-radius: 6px; display: flex; justify-content: space-between; }
-        .completed { text-decoration: line-through; color: #94a3b8; }
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            --glass-bg: rgba(255, 255, 255, 0.85);
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08), inset 0 0 0 1px rgba(255,255,255,0.5);
+            width: 100%;
+            max-width: 550px;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--text-main);
+            margin-top: 0;
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 30px;
+        }
+
+        h1 span {
+            color: var(--primary);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            font-size: 16px;
+            color: var(--text-main);
+            transition: all 0.3s ease;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+            background: #fff;
+        }
+
+        button {
+            padding: 14px 24px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 4px 6px rgba(79, 70, 229, 0.25);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        
+        ul > li {
+            background: white;
+            padding: 18px 20px;
+            border-radius: 10px;
+            border-left: 6px solid var(--primary);
+            color: var(--text-main);
+            font-size: 16px;
+            font-weight: 500;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+            animation: slideIn 0.4s ease-out forwards;
+            opacity: 0;
+            transform: translateX(-10px);
+            display: flex;
+            align-items: center;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        ul > li:hover {
+            transform: translateX(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+
+        .empty-state {
+            border-left-color: #EF4444 !important;
+            color: var(--text-muted) !important;
+            justify-content: center;
+            font-style: italic;
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Dashboard DevOps App</h1>
-        <span class="status-badge" id="status">Cargando estado...</span>
-        
-        <h3>Lista de Tareas (API REST)</h3>
-        <ul id="task-list"></ul>
+    <div class="container">
+        <h1>Gestor de <span>Tareas</span></h1>
+        <form id="taskForm" class="input-group">
+            <input type="text" id="taskInput" placeholder="¿Qué necesitas hacer hoy?" required>
+            <button type="submit">Añadir</button>
+        </form>
+        <ul id="taskList">
+            
+        </ul>
     </div>
 
     <script>
-        fetch('/health')
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('status').innerText = `Estado API: ${data.status}`;
-            })
-            .catch(() => {
-                document.getElementById('status').innerText = 'API Offline';
-                document.getElementById('status').style.backgroundColor = '#ef4444';
-            });
+        const taskForm = document.getElementById('taskForm');
+        const taskInput = document.getElementById('taskInput');
+        const taskList = document.getElementById('taskList');
 
-        fetch('/api/v1/tasks')
-            .then(res => res.json())
-            .then(tasks => {
-                const list = document.getElementById('task-list');
-                list.innerHTML = tasks.map(t => 
-                    `<li><span class="${t.completed ? 'completed' : ''}">${t.title}</span> <span>${t.completed ? '✅' : '⏳'}</span></li>`
-                ).join('');
+        async function fetchTasks() {
+            try {
+                const response = await fetch('/api/v1/tasks');
+                const tasks = await response.json();
+                renderTasks(tasks);
+            } catch (error) {
+                console.error('Error al cargar la base de datos:', error);
+            }
+        }
+
+        function renderTasks(tasks) {
+            taskList.innerHTML = ''; 
+            
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<li class="empty-state">No hay tareas pendientes. ¡Añade tu primera meta!</li>';
+                return;
+            }
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.textContent = task.title;
+                
+                li.style.animationDelay = `${index * 0.1}s`;
+                taskList.appendChild(li);
             });
+        }
+
+        taskForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            const title = taskInput.value.trim();
+            
+            if (title) {
+                try {
+                    const response = await fetch('/api/v1/tasks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ title })
+                    });
+                    
+                    if (response.ok) {
+                        taskInput.value = ''; 
+                        fetchTasks(); 
+                    }
+                } catch (error) {
+                    console.error('Error al guardar la tarea:', error);
+                }
+            }
+        });
+
+        fetchTasks();
     </script>
 </body>
 </html>
