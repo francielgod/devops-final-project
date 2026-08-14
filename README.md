@@ -1,57 +1,67 @@
 # 🚀 Proyecto Final DevOps - Task API App
 
-![GitHub Actions Status](https://img.shields.io/github/actions/workflow/status/francielgod/devops-final-project/ci-cd.yml?branch=main&style=flat-square&logo=github)
-![Docker Pulls](https://img.shields.io/docker/pulls/francielbeltre/devops-task-app?style=flat-square&logo=docker)
-![Node.js](https://img.shields.io/badge/Node.js-18-339933?style=flat-square&logo=nodedotjs)
+Este proyecto demuestra la implementación de un ecosistema DevOps completo para una aplicación web (API de Tareas), integrando prácticas de Integración Continua, Entrega Continua (CI/CD), contenerización, pruebas automatizadas y monitoreo.
 
-Este repositorio contiene el proyecto final para la asignatura de DevOps del Instituto Tecnológico de Las Américas (ITLA). Se trata de una aplicación web y API REST desarrollada en Node.js, contenerizada con Docker y automatizada mediante un pipeline completo de Integración y Entrega Continua (CI/CD).
-
-## 🛠️ Tecnologías y Herramientas Utilizadas
-
-*   **Backend:** Node.js, Express.js
-*   **Frontend:** HTML5, CSS3, JavaScript (Vanilla)
-*   **Pruebas Unitarias/Integración:** Jest, Supertest
-*   **Monitoreo y Métricas:** Prometheus (prom-client)
-*   **Contenerización:** Docker, Docker Compose
-*   **Automatización CI/CD:** GitHub Actions
-*   **Registro de Contenedores:** Docker Hub
+## 🛠️ Tecnologías Utilizadas
+* **Backend:** Node.js con Express
+* **Base de Datos:** SQLite
+* **Contenerización:** Docker & Docker Hub
+* **CI/CD:** GitHub Actions
+* **Pruebas:** Jest & Supertest
+* **Monitoreo:** Prometheus (Métricas) y Morgan (Logs centralizados)
 
 ---
 
-## ⚙️ Características de la Aplicación
+## 📖 Guía de Instalación (Local)
 
-La aplicación expone los siguientes endpoints principales:
+Sigue estos pasos para ejecutar el proyecto en tu entorno local:
 
-*   `GET /`: Interfaz gráfica interactiva (Dashboard).
-*   `GET /api/v1/tasks`: Devuelve una lista de tareas en formato JSON.
-*   `GET /health`: Endpoint de validación de salud (Health Check) que retorna `{"status": "UP"}`.
-*   `GET /metrics`: Expone métricas de rendimiento y uso en el formato estándar de Prometheus.
+1. **Clonar el repositorio:**
+   \`\`\`bash
+   git clone https://github.com/francielgod/devops-final-project.git
+   cd devops-final-project
+   \`\`\`
 
----
+2. **Instalar dependencias:**
+   \`\`\`bash
+   npm install
+   \`\`\`
 
-## 🔄 Arquitectura del Pipeline CI/CD
-
-El flujo de trabajo automatizado (`.github/workflows/ci-cd.yml`) se dispara automáticamente con cada `push` o `pull_request` a la rama principal y consta de tres etapas:
-
-1.  **Integración Continua (Calidad & Pruebas):**
-    *   Descarga el código fuente.
-    *   Instala las dependencias mediante `npm install`.
-    *   Ejecuta análisis estático (Linter).
-    *   Ejecuta la suite de pruebas unitarias y de integración con Jest.
-2.  **Construcción y Publicación (Docker):**
-    *   Se autentica de forma segura en Docker Hub.
-    *   Construye la imagen de la aplicación (`Dockerfile`).
-    *   Publica la imagen en el repositorio de Docker Hub con las etiquetas `latest` y el SHA del commit.
-3.  **Despliegue Automatizado:**
-    *   Simula el despliegue en un entorno de producción verificando el estado de la imagen generada.
+3. **Ejecutar la aplicación:**
+   \`\`\`bash
+   npm start
+   \`\`\`
+   El servidor estará disponible en `http://localhost:3000`.
 
 ---
 
-## 🚀 Cómo ejecutar el proyecto localmente
+## ⚙️ Documentación del Pipeline (CI/CD)
 
-### Opción 1: Usando la imagen oficial desde Docker Hub (Recomendado)
+El proyecto utiliza **GitHub Actions** para automatizar el ciclo de vida del software. El pipeline se dispara automáticamente con cada `push` o `pull request` a la rama `main` y consta de los siguientes pasos:
 
-No necesitas clonar el repositorio, solo tener Docker instalado en tu máquina y ejecutar:
+1. **Checkout del código:** Descarga el código fuente del repositorio.
+2. **Configuración de Node.js:** Prepara el entorno con la versión 18 de Node.
+3. **Instalación de dependencias:** Ejecuta `npm ci` para instalaciones limpias.
+4. **Análisis Estático (Linting):** Ejecuta ESLint para garantizar la calidad del código.
+5. **Pruebas Automatizadas:** Ejecuta la suite de pruebas con Jest, utilizando una base de datos SQLite en memoria (`:memory:`) para no afectar los datos reales.
+6. **Construcción y Despliegue Docker:** Si todas las pruebas pasan, construye la imagen de Docker y la publica automáticamente en Docker Hub.
 
-```bash
-docker run -d -p 3000:3000 francielbeltre/devops-task-app:latest
+---
+
+## 📋 Manual de Operaciones
+
+### 1. Endpoints Principales
+* `GET /health` - Verifica el estado de salud de la API.
+* `GET /api/v1/tasks` - Obtiene todas las tareas desde SQLite.
+* `POST /api/v1/tasks` - Crea una nueva tarea (Body: `{"title": "Nombre de tarea"}`).
+
+### 2. Sistema de Monitoreo
+* **Métricas:** Disponibles en `GET /metrics` en formato compatible con Prometheus.
+* **Logs:** El servidor registra todas las peticiones HTTP de forma centralizada utilizando el formato estándar de Apache mediante `morgan`.
+* **Alertas:** Se puede simular una alerta crítica en el sistema enviando una petición a `POST /api/v1/alert`, lo que disparará un aviso en los logs del servidor.
+
+### 3. Ejecución con Docker
+Para ejecutar la versión contenerizada directamente desde Docker Hub:
+\`\`\`bash
+docker run -p 3000:3000 francielbeltre/devops-task-app:latest
+\`\`\`
